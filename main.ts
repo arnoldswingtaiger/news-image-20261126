@@ -49,6 +49,14 @@ if (digest(delivered) !== shippedDigest) {
   throw new Error("copied entry.png does not match the shipped front page");
 }
 
+// The gate refuses any image over 1 MiB, so refuse it here first.
+const ONE_MIB = 1024 * 1024;
+if (deliveredSize > ONE_MIB) {
+  throw new Error(
+    `copied entry.png is ${deliveredSize} bytes, over the 1 MiB gate limit`,
+  );
+}
+
 // A whole PNG starts with its eight-byte signature; a cut-off file would not.
 const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 if (!delivered.subarray(0, 8).equals(pngMagic)) {
